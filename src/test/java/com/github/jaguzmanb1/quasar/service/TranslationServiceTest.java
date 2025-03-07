@@ -1,106 +1,98 @@
 package com.github.jaguzmanb1.quasar.service;
 
-import com.github.jaguzmanb1.quasar.entity.Satellite;
-import com.github.jaguzmanb1.quasar.util.MergeArraysUtils;
-import com.github.jaguzmanb1.quasar.util.TrilaterationUtils;
+import com.github.jaguzmanb1.quasar.dto.SpaceShipInfoDTO;
+import com.github.jaguzmanb1.quasar.dto.TopSecretResponseDTO;
+import com.github.jaguzmanb1.quasar.service.location.LocationCalculatorInterface;
+import com.github.jaguzmanb1.quasar.service.messages.MessageDecoderInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class TranslationServiceTest {
-    private Satellite[] satellites;
+public class TranslationServiceTest {
+
+    @Mock
+    private LocationCalculatorInterface locationCalculator;
+
+    @Mock
+    private MessageDecoderInterface messageDecoder;
+
+    @InjectMocks
     private TranslationService translationService;
 
     @BeforeEach
-    void setUp() {
-        satellites = new Satellite[]{
-                new Satellite("Sat1", new Point(0, 0)),
-                new Satellite("Sat2", new Point(1, 1)),
-                new Satellite("Sat3", new Point(2, 2))
-        };
-        translationService = new TranslationService(satellites);
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        translationService.init();
     }
 
     @Test
-    void testConstructor_Success() {
-        Satellite[] satellites = new Satellite[]{
-                new Satellite("Sat1", new Point(0, 0)),
-                new Satellite("Sat2", new Point(1, 1)),
-                new Satellite("Sat3", new Point(2, 2))
-        };
+    public void testReturnTopSecretResponse() {
+        List<SpaceShipInfoDTO> spaceShipInfo = Arrays.asList(
+                new SpaceShipInfoDTO("kenobi", 100.0, Arrays.asList("this", "", "", "message")),
+                new SpaceShipInfoDTO("skywalker", 115.5, Arrays.asList("", "is", "", "")),
+                new SpaceShipInfoDTO("sato", 142.7, Arrays.asList("", "", "a", ""))
+        );
 
-        TranslationService translationService = new TranslationService(satellites);
+        Point expectedLocation = new Point(100, 200);
+        String expectedMessage = "this is a message";
 
-        assertNotNull(translationService);
+        when(locationCalculator.calculateLocation(
+                new Point(-500, -200),
+                spaceShipInfo.get(0).getDistance(),
+                new Point(100, -100),
+                spaceShipInfo.get(1).getDistance(),
+                new Point(500, 100),
+                spaceShipInfo.get(2).getDistance())
+        ).thenReturn(expectedLocation);
+
+        List<List<String>> messages = List.of(
+                List.of("this", "", "", "message"),
+                List.of("", "is", "", ""),
+                List.of("", "", "a", "")
+        );
+
+        when(messageDecoder.decodeMessage(messages)).thenReturn(expectedMessage);
+
+        TopSecretResponseDTO response = translationService.returnTopSecretResponse(spaceShipInfo);
+
+        assertEquals(expectedLocation, response.getPosition());
+        assertEquals(expectedMessage, response.getMessage());
     }
 
     @Test
-    void testConstructor_InsufficientSatellites() {
-        Satellite[] satellites = new Satellite[]{
-                new Satellite("Sat1", new Point(0, 0)),
-                new Satellite("Sat2", new Point(1, 1))
-        };
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                new TranslationService(satellites));
-
-        assertEquals("At least 3 satellites are required", exception.getMessage());
+    public void testReturnTopSecretResponseWithNullInput() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            translationService.returnTopSecretResponse(null);
+        });
     }
 
     @Test
-    void testGetLocation_Success() {
-        double[] distances = {1.0, 1.5, 2.0};
-        Point expectedPoint = new Point(3, 3);
-
-        try (MockedStatic<TrilaterationUtils> mockedTrilateration = mockStatic(TrilaterationUtils.class)) {
-            mockedTrilateration.when(() ->
-                    TrilaterationUtils.trilaterate(
-                            satellites[0].getPosition(),
-                            distances[0],
-                            satellites[1].getPosition(),
-                            distances[1],
-                            satellites[2].getPosition(),
-                            distances[2])
-            ).thenReturn(expectedPoint);
-
-            Point result = translationService.getLocation(distances);
-
-            assertEquals(expectedPoint, result);
-        }
+    public void testReturnTopSecretResponseWithEmptyList() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            translationService.returnTopSecretResponse(Collections.emptyList());
+        });
     }
 
     @Test
-    void testGetLocation_InvalidDistances() {
-        double[] invalidDistances = {1.0, 2.0};
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                translationService.getLocation(invalidDistances));
+    public void testReturnTopSecretResponseWithIncompleteData() {
+        List<SpaceShipInfoDTO> spaceShipInfo = Arrays.asList(
+                new SpaceShipInfoDTO("kenobi", 100.0, null),
+                new SpaceShipInfoDTO("skywalker", 115.5, null)
+        );
 
-        assertEquals("Exactly 3 distances are required", exception.getMessage());
-    }
-
-    @Test
-    void testGetMessage_Success() {
-        String[][] messages = {
-                {"", "hello", "world"},
-                {"hello", "", "world"},
-                {"hello", "world", ""}
-        };
-        String expectedMessage = "hello world";
-
-        try (MockedStatic<MergeArraysUtils> mockedMergeArrays = mockStatic(MergeArraysUtils.class)) {
-            mockedMergeArrays.when(() -> MergeArraysUtils.mergeArrays(messages)).thenReturn(expectedMessage);
-
-            String result = translationService.getMessage(messages);
-
-            assertEquals(expectedMessage, result);
-        }
+        assertThrows(IllegalArgumentException.class, () -> {
+            translationService.returnTopSecretResponse(spaceShipInfo);
+        });
     }
 }
