@@ -2,7 +2,6 @@ package com.github.jaguzmanb1.quasar.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import java.util.List;
 
 /**
@@ -41,6 +40,7 @@ public class SpaceShipInfoDTO {
      * @param message the list of messages received from the spaceship
      */
     public SpaceShipInfoDTO(String name, double distance, List<String> message) {
+        this.name = name;
         this.distance = distance;
         this.message = message;
     }
@@ -78,6 +78,14 @@ public class SpaceShipInfoDTO {
      */
     public List<String> getMessage() {
         return message;
+    }
+
+    public String getMessageAsString() {
+        return convertListToString(message);
+    }
+
+    private String convertListToString(List<String> messages) {
+        return (messages != null && !messages.isEmpty()) ? String.join(",", messages) : null;
     }
 
     /**

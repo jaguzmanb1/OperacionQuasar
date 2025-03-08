@@ -16,15 +16,16 @@ public class Satellite {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Transient
-    private Point position;
+    // Guardar las coordenadas como columnas separadas
+    @Column(name = "position_x", nullable = false)
+    private int positionX;
+
+    @Column(name = "position_y", nullable = false)
+    private int positionY;
 
     @Column(nullable = false)
     private Double distance;
 
-    /**
-     * The received message fragments from the satellite, stored as a single string (comma-separated).
-     */
     @Column(name = "received_message")
     private String receivedMessage;
 
@@ -32,14 +33,16 @@ public class Satellite {
 
     public Satellite(String name, Point position, Double distance, List<String> receivedMessage) {
         this.name = name;
-        this.position = position;
+        this.positionX = position.x;
+        this.positionY = position.y;
         this.distance = distance;
         this.receivedMessage = receivedMessage != null ? String.join(",", receivedMessage) : null;
     }
 
     public Satellite(String name, Point position) {
         this.name = name;
-        this.position = position;
+        this.positionX = position.x;
+        this.positionY = position.y;
         this.distance = 0.0;
         this.receivedMessage = "";
     }
@@ -53,11 +56,12 @@ public class Satellite {
     }
 
     public Point getPosition() {
-        return position;
+        return new Point(positionX, positionY);
     }
 
     public void setPosition(Point position) {
-        this.position = position;
+        this.positionX = position.x;
+        this.positionY = position.y;
     }
 
     public Double getDistance() {

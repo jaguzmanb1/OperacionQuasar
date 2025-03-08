@@ -25,7 +25,7 @@ public class TrilaterationCalculator implements LocationCalculatorInterface {
     @Override
     public Point calculateLocation(Point P1, double r1, Point P2, double r2, Point P3, double r3) {
         if (!isValidTrilateration(P1, r1, P2, r2, P3, r3)) {
-            throw new InvalidIntersectionException("Error 32792 - Indeterminate position...");
+            throw new InvalidIntersectionException("Error - Indeterminate position...");
         }
 
         double d = P1.distance(P2); // Distance between P1 and P2

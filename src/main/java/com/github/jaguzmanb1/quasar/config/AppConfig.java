@@ -1,6 +1,5 @@
 package com.github.jaguzmanb1.quasar.config;
 
-import com.github.jaguzmanb1.quasar.repository.SatelliteRepositoryInterface;
 import com.github.jaguzmanb1.quasar.service.location.LocationCalculatorInterface;
 import com.github.jaguzmanb1.quasar.service.location.TrilaterationCalculator;
 import com.github.jaguzmanb1.quasar.service.messages.DefaultMessageDecoder;
@@ -34,11 +33,19 @@ public class AppConfig {
     @Bean
     public DataSource dataSource() {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
+
+        String url = env.getProperty("url");
+
+        if (url == null || url.trim().isEmpty()) {
+            url = "jdbc:sqlite:./database.db";
+        }
+
         dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("driverClassName")));
-        dataSource.setUrl(env.getProperty("url"));
-        dataSource.setUsername(env.getProperty("user"));
-        dataSource.setPassword(env.getProperty("password"));
+        dataSource.setUrl(url);
+        dataSource.setUsername(env.getProperty("username", "sa"));
+        dataSource.setPassword(env.getProperty("password", "sa"));
 
         return dataSource;
     }
+
 }
