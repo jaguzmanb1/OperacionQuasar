@@ -3,6 +3,7 @@ package com.github.jaguzmanb1.quasar.service;
 import com.github.jaguzmanb1.quasar.dto.TopSecretResponseDTO;
 import com.github.jaguzmanb1.quasar.entity.Satellite;
 import com.github.jaguzmanb1.quasar.dto.SpaceShipInfoDTO;
+import com.github.jaguzmanb1.quasar.repository.SatelliteRepositoryInterface;
 import com.github.jaguzmanb1.quasar.service.location.LocationCalculatorInterface;
 import com.github.jaguzmanb1.quasar.service.messages.MessageDecoderInterface;
 import jakarta.annotation.PostConstruct;
@@ -10,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -27,11 +26,12 @@ public class TranslationService {
     private static final String SKYWALKER = "skywalker";
     private static final String SATO = "sato";
     private static final Set<String> REQUIRED_SATELLITES = Set.of(KENOBI, SKYWALKER, SATO);
-
     private Map<String, Satellite> satellites;
 
     private final LocationCalculatorInterface locationCalculator;
     private final MessageDecoderInterface messageDecoder;
+
+    private final SatelliteRepositoryInterface satelliteRepository;
 
     /**
      * Constructs a {@link TranslationService} with dependencies for location calculation and message decoding.
@@ -40,9 +40,13 @@ public class TranslationService {
      * @param messageDecoder The service responsible for reconstructing messages from satellite signals.
      */
     @Autowired
-    public TranslationService(LocationCalculatorInterface locationCalculator, MessageDecoderInterface messageDecoder) {
+    public TranslationService(
+            LocationCalculatorInterface locationCalculator,
+            MessageDecoderInterface messageDecoder,
+            SatelliteRepositoryInterface satelliteRepository) {
         this.locationCalculator = locationCalculator;
         this.messageDecoder = messageDecoder;
+        this.satelliteRepository = satelliteRepository;
     }
 
     /**
@@ -51,10 +55,44 @@ public class TranslationService {
      */
     @PostConstruct
     public void init() {
-        this.satellites = new HashMap<>();
-        this.satellites.put(KENOBI, new Satellite(KENOBI, new Point(-500, -200)));
-        this.satellites.put(SKYWALKER, new Satellite(SKYWALKER, new Point(100, -100)));
-        this.satellites.put(SATO, new Satellite(SATO, new Point(500, 100)));
+        if (satelliteRepository.count() == 0) { // Evita insertar duplicados
+            List<Satellite> satellites = Arrays.asList(
+                    new Satellite("Kenobi", new Point(-500, -200)),
+                    new Satellite("Skywalker", new Point(100, -100)),
+                    new Satellite("Sato", new Point(500, 100))
+            );
+            satelliteRepository.saveAll(satellites);
+        }
+    }
+
+    /**
+     * Updates the satellite information with the provided data.
+     *
+     * @param satelliteName the name of the satellite to update
+     * @param spaceShipInfo the new information to update the satellite with
+     * @throws IllegalArgumentException if the satellite name is null or empty, or if the spaceShipInfo is null
+     */
+    public void updateSatelliteInfo(String satelliteName, SpaceShipInfoDTO spaceShipInfo) {
+        if (satelliteName == null || satelliteName.isEmpty()) {
+            throw new IllegalArgumentException("Satellite name cannot be null or empty");
+        }
+        if (spaceShipInfo == null) {
+            throw new IllegalArgumentException("SpaceShipInfoDTO cannot be null");
+        }
+
+        satelliteRepository.updateDistanceAndMessageByName(
+                satelliteName,
+                spaceShipInfo.getDistance(),
+                convertListToString(spaceShipInfo.getMessage())
+        );
+    }
+
+    private String convertListToString(List<String> messages) {
+        return (messages != null && !messages.isEmpty()) ? String.join(",", messages) : null;
+    }
+
+    private List<String> convertStringToList(String messageString) {
+        return (messageString != null && !messageString.isEmpty()) ? Arrays.asList(messageString.split(",")) : null;
     }
 
     /**
@@ -105,10 +143,14 @@ public class TranslationService {
             distanceMap.put(info.getName(), info.getDistance());
         }
 
+        List<Satellite> satellites = satelliteRepository.findAll();
+        Map<String, Satellite> satelliteMap = satellites.stream()
+                .collect(Collectors.toMap(Satellite::getName, satellite -> satellite));
+
         return locationCalculator.calculateLocation(
-                satellites.get(KENOBI).getPosition(), distanceMap.get(KENOBI),
-                satellites.get(SKYWALKER).getPosition(), distanceMap.get(SKYWALKER),
-                satellites.get(SATO).getPosition(), distanceMap.get(SATO)
+            satelliteMap.get(KENOBI).getPosition(), distanceMap.get(KENOBI),
+            satelliteMap.get(SKYWALKER).getPosition(), distanceMap.get(SKYWALKER),
+            satelliteMap.get(SATO).getPosition(), distanceMap.get(SATO)
         );
     }
 

@@ -1,14 +1,26 @@
 package com.github.jaguzmanb1.quasar.config;
 
+import com.github.jaguzmanb1.quasar.repository.SatelliteRepositoryInterface;
 import com.github.jaguzmanb1.quasar.service.location.LocationCalculatorInterface;
 import com.github.jaguzmanb1.quasar.service.location.TrilaterationCalculator;
 import com.github.jaguzmanb1.quasar.service.messages.DefaultMessageDecoder;
 import com.github.jaguzmanb1.quasar.service.messages.MessageDecoderInterface;
+import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+import javax.sql.DataSource;
+import java.util.Objects;
+
 
 @Configuration
 public class AppConfig {
+
+    @Autowired
+    private Environment env;
+
     @Bean
     public LocationCalculatorInterface locationCalculator() {
         return new TrilaterationCalculator();
@@ -17,5 +29,16 @@ public class AppConfig {
     @Bean
     public MessageDecoderInterface messageDecoder() {
         return new DefaultMessageDecoder();
+    }
+
+    @Bean
+    public DataSource dataSource() {
+        final DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("driverClassName")));
+        dataSource.setUrl(env.getProperty("url"));
+        dataSource.setUsername(env.getProperty("user"));
+        dataSource.setPassword(env.getProperty("password"));
+
+        return dataSource;
     }
 }

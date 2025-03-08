@@ -1,67 +1,78 @@
 package com.github.jaguzmanb1.quasar.entity;
 
+import jakarta.persistence.*;
 import java.awt.*;
+import java.util.Arrays;
+import java.util.List;
 
-/**
- * Entity representing a satellite in the system.
- * This class stores the satellite's name and its fixed position in space.
- */
+@Entity
+@Table(name = "satellites")
 public class Satellite {
 
-    /**
-     * The name of the satellite.
-     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
     private String name;
 
-    /**
-     * The fixed position of the satellite in a two-dimensional space.
-     */
+    @Transient
     private Point position;
 
-    /**
-     * Constructor to initialize a satellite with a name and position.
-     *
-     * @param pName the name of the satellite
-     * @param pPosition the position of the satellite as a Point object
-     */
-    public Satellite(String pName, Point pPosition) {
-        this.setName(pName);
-        this.setPosition(pPosition);
-    }
+    @Column(nullable = false)
+    private Double distance;
 
     /**
-     * Gets the name of the satellite.
-     *
-     * @return the satellite's name as a String
+     * The received message fragments from the satellite, stored as a single string (comma-separated).
      */
+    @Column(name = "received_message")
+    private String receivedMessage;
+
+    public Satellite() {}
+
+    public Satellite(String name, Point position, Double distance, List<String> receivedMessage) {
+        this.name = name;
+        this.position = position;
+        this.distance = distance;
+        this.receivedMessage = receivedMessage != null ? String.join(",", receivedMessage) : null;
+    }
+
+    public Satellite(String name, Point position) {
+        this.name = name;
+        this.position = position;
+        this.distance = 0.0;
+        this.receivedMessage = "";
+    }
+
     public String getName() {
         return name;
     }
 
-    /**
-     * Sets the name of the satellite.
-     *
-     * @param name the new name of the satellite
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     * Gets the position of the satellite.
-     *
-     * @return the satellite's position as a Point object
-     */
     public Point getPosition() {
         return position;
     }
 
-    /**
-     * Sets the position of the satellite.
-     *
-     * @param position the new position of the satellite
-     */
     public void setPosition(Point position) {
         this.position = position;
+    }
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
+    }
+
+    public List<String> getReceivedMessage() {
+        return receivedMessage != null ? Arrays.asList(receivedMessage.split(",")) : null;
+    }
+
+    public void setReceivedMessage(List<String> receivedMessage) {
+        this.receivedMessage = receivedMessage != null ? String.join(",", receivedMessage) : null;
     }
 }

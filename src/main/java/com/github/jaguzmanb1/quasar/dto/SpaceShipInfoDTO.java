@@ -12,11 +12,8 @@ import java.util.List;
 public class SpaceShipInfoDTO {
 
     /**
-     * Name of the spaceship. Must be either "kenobi", "skywalker", or "sato".
-     * The validation is case-insensitive.
+     * Optional name for the request.
      */
-    @Pattern(regexp = "kenobi|skywalker|sato", flags = Pattern.Flag.CASE_INSENSITIVE,
-            message = "The name must be 'kenobi', 'skywalker', or 'sato'")
     private String name;
 
     /**
@@ -44,27 +41,16 @@ public class SpaceShipInfoDTO {
      * @param message the list of messages received from the spaceship
      */
     public SpaceShipInfoDTO(String name, double distance, List<String> message) {
-        this.name = name;
         this.distance = distance;
         this.message = message;
     }
 
-    /**
-     * Gets the name of the spaceship.
-     *
-     * @return the name of the spaceship
-     */
-    public String getName() {
-        return name;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    /**
-     * Sets the name of the spaceship.
-     *
-     * @param satelliteName the new name of the spaceship
-     */
-    public void setName(String satelliteName) {
-        this.name = satelliteName;
+    public String getName() {
+        return name;
     }
 
     /**
