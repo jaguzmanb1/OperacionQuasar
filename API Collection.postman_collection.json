@@ -1,0 +1,101 @@
+{
+	"info": {
+		"_postman_id": "a6072873-188a-479d-9a38-ad8b1fd194ce",
+		"name": "API Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9186356"
+	},
+	"item": [
+		{
+			"name": "Top Secret Response",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"satellites\": [\r\n        {\r\n            \"name\": \"kenobi\",\r\n            \"distance\": 100.0,\r\n            \"message\": [\r\n                \"este\",\r\n                \"\",\r\n                \"\",\r\n                \"mensaje\",\r\n                \"\",\r\n                \"final\"\r\n            ]\r\n        },\r\n        {\r\n            \"name\": \"skywalker\",\r\n            \"distance\": 115.5,\r\n            \"message\": [\r\n                \"\",\r\n                \"es\",\r\n                \"\",\r\n                \"\",\r\n                \"secreto\"\r\n            ]\r\n        },\r\n        {\r\n            \"name\": \"sato\",\r\n            \"distance\": 142.7,\r\n            \"message\": [\r\n                \"este\",\r\n                \"\",\r\n                \"un\",\r\n                \"\",\r\n                \"\"\r\n            ]\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/topsecret",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topsecret"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update split data",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"satellites\": [\r\n        {\r\n            \"name\": \"kenobi\",\r\n            \"distance\": 100.0,\r\n            \"message\": [\r\n                \"este\",\r\n                \"\",\r\n                \"\",\r\n                \"mensaje\",\r\n                \"\",\r\n                \"final\"\r\n            ]\r\n        },\r\n        {\r\n            \"name\": \"skywalker\",\r\n            \"distance\": 115.5,\r\n            \"message\": [\r\n                \"\",\r\n                \"es\",\r\n                \"\",\r\n                \"\",\r\n                \"secreto\"\r\n            ]\r\n        },\r\n        {\r\n            \"name\": \"sato\",\r\n            \"distance\": 142.7,\r\n            \"message\": [\r\n                \"este\",\r\n                \"\",\r\n                \"un\",\r\n                \"\",\r\n                \"\"\r\n            ]\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/topsecret_split/kenobi",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topsecret_split",
+						"kenobi"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get satellites",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/satellites",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"satellites"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get split response",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/satellites",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"satellites"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
